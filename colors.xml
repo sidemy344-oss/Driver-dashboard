@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Profit Tier Colors -->
+    <color name="tier_high">#00CC00</color>
+    <color name="tier_medium">#FFD700</color>
+    <color name="tier_low">#FF4444</color>
+
+    <!-- Text Colors -->
+    <color name="text_dark">#000000</color>
+    <color name="text_light">#FFFFFF</color>
+
+    <!-- Alert Colors -->
+    <color name="warning_red">#FF5555</color>
+    <color name="error_red">#FF0000</color>
+</resources>

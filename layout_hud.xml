@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/hud_root"
+    android:layout_width="280dp"
+    android:layout_height="120dp"
+    android:background="@drawable/hud_background"
+    android:elevation="10dp"
+    android:outlineProvider="background"
+    android:clipToOutline="true">
+
+    <!-- Main Content Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:gravity="center_vertical">
+
+        <!-- Section 1: PKM Value Display -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Earning Rate"
+                android:textSize="11sp"
+                android:textColor="#CCCCCC"
+                android:textStyle="bold"
+                android:alpha="0.85" />
+
+            <TextView
+                android:id="@+id/pkm_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00 DH/km"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- Section 2: Profit Tier Badge (Color-Coded) -->
+        <FrameLayout
+            android:id="@+id/tier_container"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:background="@drawable/tier_badge_background"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:id="@+id/tier_label"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="AVERAGE"
+                android:textSize="12sp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_gravity="center" />
+        </FrameLayout>
+
+        <!-- Section 3: Passenger Safety Warning -->
+        <TextView
+            android:id="@+id/warning_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚠ Low rating · New user"
+            android:textSize="10sp"
+            android:textColor="#FF5555"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:gravity="center"
+            android:layout_marginTop="2dp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- Section 4: Error Display -->
+        <TextView
+            android:id="@+id/error_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="✗ Parsing error"
+            android:textSize="10sp"
+            android:textColor="#FF0000"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:gravity="center"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+    <!-- Drag Handle Indicator -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="3dp"
+        android:background="#666666"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="2dp"
+        android:alpha="0.5" />
+</FrameLayout>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etsy Trend Hunter - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #f76b1c, #e94e77); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; }
+        header h1 { font-size: 2em; margin-bottom: 8px; }
+        header p { opacity: 0.9; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+        .stat-card .number { font-size: 2em; font-weight: bold; color: #e94e77; }
+        .stat-card .label { color: #666; font-size: 0.9em; }
+        .section { background: white; border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .section h2 { color: #333; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f76b1c; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f9f9f9; font-weight: 600; color: #555; }
+        tr:hover { background: #fafafa; }
+        .score { background: #e94e77; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; font-weight: bold; }
+        .bar-row { display: flex; align-items: center; margin: 8px 0; }
+        .bar-label { min-width: 100px; font-size: 0.85em; color: #666; }
+        .bar { height: 24px; background: linear-gradient(90deg, #f76b1c, #e94e77); border-radius: 4px; margin: 0 10px; transition: width 0.3s; }
+        .bar-value { font-size: 0.85em; font-weight: bold; color: #333; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+        .card { background: #f9f9f9; padding: 16px; border-radius: 8px; border-left: 4px solid #f76b1c; }
+        .card h4 { color: #333; margin-bottom: 4px; }
+        .card p { color: #666; font-size: 0.9em; }
+        footer { text-align: center; padding: 20px; color: #999; font-size: 0.85em; }
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            header { padding: 20px; }
+            header h1 { font-size: 1.5em; }
+            table { font-size: 0.8em; }
+            th, td { padding: 6px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Etsy Trend Hunter</h1>
+            <p>Generated: {{ generated_at }} | Queries: {{ queries | join(', ') or 'N/A' }}</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number">{{ total_listings }}</div>
+                <div class="label">Listings Analyzed</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">{{ keyword_count }}</div>
+                <div class="label">Keywords Found</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">${{ "%.2f"|format(price_stats.avg) }}</div>
+                <div class="label">Avg Price</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">{{ niche_opportunities | length }}</div>
+                <div class="label">Niche Opportunities</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Top 20 Trending Keywords</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Keyword</th>
+                        <th>Frequency</th>
+                        <th>Avg Price</th>
+                        <th>Avg Reviews</th>
+                        <th>Opportunity Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for kw in keyword_table %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ kw.keyword }}</strong></td>
+                        <td>{{ kw.frequency }}</td>
+                        <td>${{ "%.2f"|format(kw.avg_price) }}</td>
+                        <td>{{ "%.1f"|format(kw.avg_reviews) }}</td>
+                        <td><span class="score">{{ "%.2f"|format(kw.opportunity_score) }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Price Distribution</h2>
+            {% if price_distribution %}
+            {% for bucket in price_distribution %}
+            <div class="bar-row">
+                <span class="bar-label">{{ bucket.range }}</span>
+                <div class="bar" style="width: {{ [bucket.percentage * 3, 100] | min }}%"></div>
+                <span class="bar-value">{{ bucket.count }}</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p>No price data available.</p>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h2>Niche Opportunities</h2>
+            {% if niche_opportunities %}
+            <div class="cards-grid">
+                {% for niche in niche_opportunities %}
+                <div class="card">
+                    <h4>{{ niche.keyword }}</h4>
+                    <p>Avg Price: ${{ "%.2f"|format(niche.avg_price) }} | Freq: {{ niche.frequency }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No niche opportunities detected.</p>
+            {% endif %}
+        </div>
+
+        {% if saturated_keywords %}
+        <div class="section">
+            <h2>Saturated Keywords (Avoid)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Keyword</th>
+                        <th>Frequency</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for kw in saturated_keywords %}
+                    <tr>
+                        <td>{{ kw.keyword }}</td>
+                        <td>{{ kw.frequency }}</td>
+                        <td>{{ "%.2f"|format(kw.opportunity_score) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if rising_keywords %}
+        <div class="section">
+            <h2>Rising Keywords</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Keyword</th>
+                        <th>Growth</th>
+                        <th>Current Freq</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for kw in rising_keywords %}
+                    <tr>
+                        <td>{{ kw.keyword }}</td>
+                        <td>+{{ "%.0f"|format(kw.growth_rate * 100) }}%</td>
+                        <td>{{ kw.current_frequency }}</td>
+                        <td>{{ kw.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>Etsy Trend Hunter &mdash; T-Shirt Design Intelligence Tool</p>
+        </footer>
+    </div>
+</body>
+</html>
